@@ -49,8 +49,8 @@ const LoadingScreen = () => (
 function CameraManager({ onScrollStateChange, score }) {
   const scroll = useScroll();
   const fogRef = useRef(new THREE.FogExp2('#000000', 0));
-  const darkColor = useRef(new THREE.Color('#11151a'));
-  const lightColor = useRef(new THREE.Color('#aaccff'));
+  const darkColor = useRef(new THREE.Color('#3b4754')); // iOS Weather slate grey
+  const lightColor = useRef(new THREE.Color('#4a8bdd')); // iOS Weather rich blue
   const finalColor = useRef(new THREE.Color('#000000'));
   const blackColor = useRef(new THREE.Color('#000000'));
 
@@ -97,8 +97,10 @@ export default function Scene({ score, onScrollStateChange }) {
   return (
     <ErrorBoundary>
       <Canvas camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
-        <ambientLight intensity={0.1} />
-        <directionalLight position={[5, 3, 5]} intensity={2.5} color="#ffffff" />
+        {/* Pitch black ambient light for realistic space shadows */}
+        <ambientLight intensity={0.02} />
+        {/* Illumination from top-left, matching iOS Earth lockscreen */}
+        <directionalLight position={[-5, 5, 5]} intensity={3.0} color="#ffffff" />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         
         <ScrollControls pages={2} damping={0.2}>

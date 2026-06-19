@@ -7,8 +7,6 @@ export default function EarthView({ score }) {
   const earthRef = useRef();
   const lightsRef = useRef();
   const cloudsRef = useRef();
-  const rimRef1 = useRef();
-  const rimRef2 = useRef();
   const scroll = useScroll();
 
   const [colorMap, normalMap, specularMap, lightsMap, cloudsMap] = useLoader(THREE.TextureLoader, [
@@ -40,24 +38,21 @@ export default function EarthView({ score }) {
     }
 
     if (cloudsRef.current) {
-      cloudsRef.current.material.opacity = fade * 0.7;
+      cloudsRef.current.material.opacity = fade * 0.4;
       cloudsRef.current.material.needsUpdate = true;
     }
-
-    if (rimRef1.current) rimRef1.current.material.opacity = fade * 0.12;
-    if (rimRef2.current) rimRef2.current.material.opacity = fade * 0.05;
   });
 
   return (
     <group>
-      {/* Base Earth */}
+      {/* Base Earth - Realistic High Contrast */}
       <Sphere ref={earthRef} args={[1, 64, 64]}>
         <meshPhongMaterial 
           map={colorMap}
           normalMap={normalMap}
           specularMap={specularMap}
-          specular={new THREE.Color('#4488ff')}
-          shininess={15}
+          specular={new THREE.Color('#224488')}
+          shininess={10}
           bumpScale={0.015}
           depthWrite={true}
         />
@@ -79,32 +74,10 @@ export default function EarthView({ score }) {
         <meshStandardMaterial
           map={cloudsMap}
           transparent
-          opacity={0.7}
+          opacity={0.4}
           depthWrite={false}
           roughness={1}
           metalness={0}
-        />
-      </Sphere>
-
-      {/* Atmospheric Glow */}
-      <Sphere ref={rimRef1} args={[1.06, 64, 64]}>
-        <meshBasicMaterial
-          color="#3a6fcc"
-          side={THREE.BackSide}
-          transparent
-          opacity={0.12}
-          depthWrite={false}
-        />
-      </Sphere>
-
-      {/* Outer soft glow layer */}
-      <Sphere ref={rimRef2} args={[1.15, 64, 64]}>
-        <meshBasicMaterial
-          color="#1a3a8a"
-          side={THREE.BackSide}
-          transparent
-          opacity={0.05}
-          depthWrite={false}
         />
       </Sphere>
     </group>
