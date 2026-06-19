@@ -1,47 +1,93 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { ScrollControls, useScroll, Stars } from '@react-three/drei';
+import { ScrollControls, useScroll, Stars, Html } from '@react-three/drei';
 import EarthView from './EarthView';
 import AtmosphereView from './AtmosphereView';
 import * as THREE from 'three';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          position: 'fixed', inset: 0, background: '#000',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontFamily: 'Inter, sans-serif', letterSpacing: '4px'
+        }}>
+          KIN — Loading environment...
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const LoadingScreen = () => (
+  <Html fullscreen>
+    <div style={{
+      position: 'absolute', inset: 0, background: '#000',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      color: '#fff', fontFamily: 'Inter, sans-serif',
+      gap: '20px', zIndex: 9999
+    }}>
+      <div style={{ fontSize: '28px', letterSpacing: '8px', fontWeight: 200 }}>KIN</div>
+      <div style={{ fontSize: '11px', letterSpacing: '3px', opacity: 0.4, textTransform: 'uppercase' }}>
+        Loading Earth...
+      </div>
+    </div>
+  </Html>
+);
+
 function CameraManager({ onScrollStateChange, score }) {
   const scroll = useScroll();
+  const fogRef = useRef(new THREE.FogExp2('#000000', 0));
+  const darkColor = useRef(new THREE.Color('#11151a'));
+  const lightColor = useRef(new THREE.Color('#aaccff'));
+  const finalColor = useRef(new THREE.Color('#000000'));
+  const blackColor = useRef(new THREE.Color('#000000'));
+
+  useEffect(() => {
+    fogRef.current = new THREE.FogExp2('#000000', 0);
+  }, []);
 
   useFrame((state) => {
     const offset = scroll.offset;
     if (onScrollStateChange) onScrollStateChange(offset);
 
-    // Camera dive: Z starts at 5 (Space), ends at 1.05 (Ocean Level)
-    let targetZ = THREE.MathUtils.lerp(5, 1.05, offset);
+    const isHealthy = score / 100;
+
+    finalColor.current.lerpColors(darkColor.current, lightColor.current, isHealthy);
+    finalColor.current.lerp(blackColor.current, Math.max(0, 1 - (offset - 0.5) * 2));
+
+    const targetZ = THREE.MathUtils.lerp(5, 1.05, offset);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.1);
-    
-    // Look along the horizon as we land
-    let targetRotX = THREE.MathUtils.lerp(0, 0.1, offset);
+    const targetRotX = THREE.MathUtils.lerp(0, 0.1, offset);
     state.camera.rotation.x = THREE.MathUtils.lerp(state.camera.rotation.x, targetRotX, 0.1);
 
-    // Dynamic Fog & Background color based on score
-    const isHealthy = score / 100;
-    
-    // Base fog color depends on health
-    const targetFogColor = new THREE.Color().lerpColors(
-      new THREE.Color('#11151a'), // dark stormy grey
-      new THREE.Color('#aaccff'), // bright healthy blue
-      isHealthy
-    );
-
-    // Fade to black when in space (offset < 0.5)
-    const finalFogColor = new THREE.Color('#000000').lerp(targetFogColor, Math.max(0, (offset - 0.5) * 2));
-
-    // Fog density spikes as we go through the clouds (offset ~0.5), then settles
     let fogDensity = 0;
     if (offset > 0.4) {
-      const settleDensity = THREE.MathUtils.lerp(0.08, 0.01, isHealthy); // Thicker fog when damaged
+      const settleDensity = THREE.MathUtils.lerp(0.08, 0.01, isHealthy);
       fogDensity = THREE.MathUtils.lerp(0.0, settleDensity, (offset - 0.4) * 1.6);
     }
 
-    state.scene.background = finalFogColor;
-    state.scene.fog = new THREE.FogExp2(finalFogColor, fogDensity);
+    if (!state.scene.fog) {
+      state.scene.fog = fogRef.current;
+    }
+    state.scene.fog.color.copy(finalColor.current);
+    state.scene.fog.density = fogDensity;
+    
+    if (!state.scene.background) {
+      state.scene.background = new THREE.Color();
+    }
+    state.scene.background.copy(finalColor.current);
   });
 
   return null;
@@ -49,22 +95,23 @@ function CameraManager({ onScrollStateChange, score }) {
 
 export default function Scene({ score, onScrollStateChange }) {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
-      {/* Space ambient lighting */}
-      <ambientLight intensity={0.1} />
-      <directionalLight position={[5, 3, 5]} intensity={2.5} color="#ffffff" />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-      
-      <ScrollControls pages={2} damping={0.2}>
-        <CameraManager onScrollStateChange={onScrollStateChange} score={score} />
+    <ErrorBoundary>
+      <Canvas camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
+        <ambientLight intensity={0.1} />
+        <directionalLight position={[5, 3, 5]} intensity={2.5} color="#ffffff" />
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         
-        <React.Suspense fallback={null}>
-          <group>
+        <ScrollControls pages={2} damping={0.2}>
+          <CameraManager onScrollStateChange={onScrollStateChange} score={score} />
+          
+          <React.Suspense fallback={<LoadingScreen />}>
             <EarthView score={score} />
+          </React.Suspense>
+          <React.Suspense fallback={null}>
             <AtmosphereView score={score} />
-          </group>
-        </React.Suspense>
-      </ScrollControls>
-    </Canvas>
+          </React.Suspense>
+        </ScrollControls>
+      </Canvas>
+    </ErrorBoundary>
   );
 }

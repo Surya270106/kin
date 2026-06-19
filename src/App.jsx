@@ -4,14 +4,10 @@ import Questionnaire from './components/Questionnaire';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
-  // Score starts neutral. 0 = worst (raining, dark), 100 = best (sunny, lush green)
   const [score, setScore] = useState(50);
-  
-  // To track which page/state we are in based on scroll position (passed up from Canvas)
   const [inAtmosphere, setInAtmosphere] = useState(false);
 
   const handleScrollState = (offset) => {
-    // If offset > 0.5, we are inside the atmosphere
     if (offset > 0.6 && !inAtmosphere) {
       setInAtmosphere(true);
     } else if (offset < 0.6 && inAtmosphere) {
@@ -21,17 +17,18 @@ function App() {
 
   return (
     <>
-      <div className="title">KIN</div>
-      
-      <div className="score-display">
-        <div 
-          className="dot" 
-          style={{ 
-            background: score > 60 ? '#00ff66' : score < 40 ? '#ff0033' : '#a0a0a0',
-            boxShadow: `0 0 10px ${score > 60 ? '#00ff66' : score < 40 ? '#ff0033' : '#a0a0a0'}`
-          }}
-        />
-        IMPACT: {score}
+      <div
+        className="title"
+        style={{
+          color: score > 60
+            ? `rgba(100, 255, 150, ${0.7 + (score - 60) / 100})`
+            : score < 40
+            ? `rgba(180, 210, 255, ${0.5 + (40 - score) / 100})`
+            : '#ffffff',
+          transition: 'color 2s ease'
+        }}
+      >
+        KIN
       </div>
 
       <Scene score={score} onScrollStateChange={handleScrollState} />
@@ -44,7 +41,12 @@ function App() {
 
       <AnimatePresence>
         {!inAtmosphere && (
-          <div className="scroll-indicator">Scroll down to enter atmosphere</div>
+          <div className="scroll-indicator">
+            <div style={{ fontSize: '11px', letterSpacing: '3px', marginBottom: '8px' }}>
+              SCROLL
+            </div>
+            <div style={{ fontSize: '20px', lineHeight: 1 }}>↓</div>
+          </div>
         )}
       </AnimatePresence>
     </>

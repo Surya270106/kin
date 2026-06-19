@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600&display=swap');
 
 body, html {
   margin: 0;
@@ -43,10 +43,11 @@ body, html {
 }
 
 .questionnaire h2 {
-  font-weight: 200;
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 1.5;
   margin-top: 0;
   margin-bottom: 30px;
-  font-size: 24px;
 }
 
 .btn-container {
@@ -86,26 +87,6 @@ body, html {
   box-shadow: 0 0 20px rgba(255, 0, 50, 0.3);
 }
 
-.score-display {
-  position: absolute;
-  top: 30px;
-  right: 40px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.score-display .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  transition: all 0.5s ease;
-}
-
 .title {
   position: absolute;
   top: 30px;
@@ -113,6 +94,7 @@ body, html {
   font-size: 24px;
   font-weight: 200;
   letter-spacing: 4px;
+  z-index: 10;
 }
 
 .scroll-indicator {
@@ -120,9 +102,7 @@ body, html {
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  text-align: center;
   opacity: 0.5;
   animation: pulse 2s infinite;
 }
@@ -131,4 +111,11 @@ body, html {
   0% { opacity: 0.3; }
   50% { opacity: 0.8; }
   100% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-indicator {
+    animation: none;
+    opacity: 0.5;
+  }
 }

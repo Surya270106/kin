@@ -41,7 +41,10 @@ export default function Questionnaire({ score, setScore }) {
         <div className="questionnaire">
           <h2>Thank you for checking in.</h2>
           <p style={{marginBottom: "30px", opacity: 0.7}}>Your environment reflects your choices. Scroll up to see the global view.</p>
-          <button className="btn" onClick={() => setCurrentQIndex(0)}>Reset Journey</button>
+          <button className="btn" onClick={() => {
+            setCurrentQIndex(0);
+            setScore(50);
+          }}>Reset Journey</button>
         </div>
       </motion.div>
     );
@@ -50,7 +53,6 @@ export default function Questionnaire({ score, setScore }) {
   const q = questions[currentQIndex];
 
   const handleAnswer = (impact) => {
-    // Score clamped between 0 and 100
     setScore(prev => Math.max(0, Math.min(100, prev + impact)));
     setCurrentQIndex(prev => prev + 1);
   };
@@ -62,20 +64,23 @@ export default function Questionnaire({ score, setScore }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -50 }}
       transition={{ duration: 0.5 }}
-      key={q.id} // Re-animate when question changes
+      key={q.id}
     >
       <div className="questionnaire">
         <h2>{q.text}</h2>
         <div className="btn-container">
           <button 
             className="btn good" 
+            autoFocus
             onClick={() => handleAnswer(q.goodImpact)}
+            aria-label={`Choose: ${q.goodText} — positive environmental impact`}
           >
             {q.goodText}
           </button>
           <button 
             className="btn bad" 
             onClick={() => handleAnswer(q.badImpact)}
+            aria-label={`Choose: ${q.badText} — negative environmental impact`}
           >
             {q.badText}
           </button>
