@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; /* Hide scrollbar, use ScrollControls instead */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let clicks pass through to 3D canvas when needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.questionnaire {
+  pointer-events: auto; /* Re-enable for UI */
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.questionnaire h2 {
+  font-weight: 200;
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 24px;
+}
+
+.btn-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+
+.btn.good:hover {
+  background: rgba(0, 255, 100, 0.2);
+  border-color: #00ff66;
+  text-shadow: 0 0 10px #00ff66;
+  box-shadow: 0 0 20px rgba(0, 255, 100, 0.3);
+}
+
+.btn.bad:hover {
+  background: rgba(255, 0, 50, 0.2);
+  border-color: #ff0033;
+  text-shadow: 0 0 10px #ff0033;
+  box-shadow: 0 0 20px rgba(255, 0, 50, 0.3);
+}
+
+.score-display {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-display .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: all 0.5s ease;
+}
+
+.title {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  font-size: 24px;
+  font-weight: 200;
+  letter-spacing: 4px;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.5;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
