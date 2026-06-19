@@ -46,7 +46,7 @@ const LoadingScreen = () => (
   </Html>
 );
 
-function CameraManager({ onScrollStateChange, score }) {
+function CameraManager({ onScrollStateChange, score, sunnyRef, rainyRef }) {
   const scroll = useScroll();
   const fogRef = useRef(new THREE.FogExp2('#000000', 0));
   
@@ -65,6 +65,14 @@ function CameraManager({ onScrollStateChange, score }) {
     if (onScrollStateChange) onScrollStateChange(offset);
 
     const isHealthy = score / 100;
+    
+    // Smoothly update CSS background opacities without triggering React re-renders!
+    if (sunnyRef && sunnyRef.current) {
+      sunnyRef.current.style.opacity = Math.min(offset * 3, 1) * isHealthy;
+    }
+    if (rainyRef && rainyRef.current) {
+      rainyRef.current.style.opacity = Math.min(offset * 3, 1) * (1 - isHealthy);
+    }
 
     targetFogColor.current.lerpColors(rainyBottom.current, sunnyBottom.current, isHealthy);
     targetFogColor.current.lerp(blackColor.current, Math.max(0, 1 - (offset - 0.5) * 2));
@@ -93,7 +101,7 @@ function CameraManager({ onScrollStateChange, score }) {
   return null;
 }
 
-export default function Scene({ score, onScrollStateChange }) {
+export default function Scene({ score, onScrollStateChange, sunnyRef, rainyRef }) {
   return (
     <ErrorBoundary>
       <Canvas gl={{ alpha: true }} camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
@@ -102,7 +110,12 @@ export default function Scene({ score, onScrollStateChange }) {
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         
         <ScrollControls pages={2} damping={0.2}>
-          <CameraManager onScrollStateChange={onScrollStateChange} score={score} />
+          <CameraManager 
+            onScrollStateChange={onScrollStateChange} 
+            score={score} 
+            sunnyRef={sunnyRef} 
+            rainyRef={rainyRef} 
+          />
           
           <React.Suspense fallback={<LoadingScreen />}>
             <EarthView score={score} />

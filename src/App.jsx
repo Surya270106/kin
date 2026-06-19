@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Scene from './components/Scene';
 import Questionnaire from './components/Questionnaire';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [score, setScore] = useState(50);
-  const [scrollOffset, setScrollOffset] = useState(0);
+  const [inAtmosphere, setInAtmosphere] = useState(false);
+  
+  const sunnyRef = useRef();
+  const rainyRef = useRef();
 
-  const isHealthy = score / 100;
+  const handleScrollState = (offset) => {
+    if (offset > 0.1 && !inAtmosphere) {
+      setInAtmosphere(true);
+    } else if (offset <= 0.1 && inAtmosphere) {
+      setInAtmosphere(false);
+    }
+  };
 
   return (
     <>
@@ -19,27 +28,32 @@ function App() {
       }} />
 
       {/* Sunny Background (iOS Weather Style) */}
-      <div style={{
+      <div ref={sunnyRef} style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(to bottom, #1d62c5 0%, #63a1ea 100%)',
-        opacity: Math.min(scrollOffset * 3, 1) * isHealthy,
-        transition: 'opacity 1s ease',
+        opacity: 0, // Managed by useFrame in Scene
+        transition: 'opacity 0.1s linear',
         zIndex: -4
       }} />
 
       {/* Rainy Background (iOS Weather Style) */}
-      <div style={{
+      <div ref={rainyRef} style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(to bottom, #2a313a 0%, #5c6874 100%)',
-        opacity: Math.min(scrollOffset * 3, 1) * (1 - isHealthy),
-        transition: 'opacity 1s ease',
+        opacity: 0, // Managed by useFrame in Scene
+        transition: 'opacity 0.1s linear',
         zIndex: -3
       }} />
 
-      <Scene score={score} onScrollStateChange={setScrollOffset} />
+      <Scene 
+        score={score} 
+        onScrollStateChange={handleScrollState} 
+        sunnyRef={sunnyRef} 
+        rainyRef={rainyRef} 
+      />
       
       <AnimatePresence>
-        {scrollOffset > 0.1 && (
+        {inAtmosphere && (
           <Questionnaire score={score} setScore={setScore} />
         )}
       </AnimatePresence>
