@@ -27,33 +27,29 @@ export default function EarthView({ score }) {
     
     if (earthRef.current) {
       earthRef.current.material.opacity = fade;
-      earthRef.current.material.transparent = true;
-      earthRef.current.material.needsUpdate = true;
     }
     
     if (lightsRef.current) {
       const baseEmissive = (score / 100) * 1.5;
       lightsRef.current.material.opacity = fade * baseEmissive;
-      lightsRef.current.material.needsUpdate = true;
     }
 
     if (cloudsRef.current) {
       cloudsRef.current.material.opacity = fade * 0.4;
-      cloudsRef.current.material.needsUpdate = true;
     }
   });
 
   return (
     <group>
-      {/* Base Earth - Realistic High Contrast */}
+      {/* Base Earth - Realistic Standard Material */}
       <Sphere ref={earthRef} args={[1, 64, 64]}>
-        <meshPhongMaterial 
+        <meshStandardMaterial 
           map={colorMap}
           normalMap={normalMap}
-          specularMap={specularMap}
-          specular={new THREE.Color('#224488')}
-          shininess={10}
-          bumpScale={0.015}
+          roughness={0.7}
+          metalness={0.1}
+          bumpScale={0.02}
+          transparent={true}
           depthWrite={true}
         />
       </Sphere>
@@ -73,7 +69,7 @@ export default function EarthView({ score }) {
       <Sphere ref={cloudsRef} args={[1.003, 64, 64]}>
         <meshStandardMaterial
           map={cloudsMap}
-          transparent
+          transparent={true}
           opacity={0.4}
           depthWrite={false}
           roughness={1}

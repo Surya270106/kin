@@ -49,10 +49,12 @@ const LoadingScreen = () => (
 function CameraManager({ onScrollStateChange, score }) {
   const scroll = useScroll();
   const fogRef = useRef(new THREE.FogExp2('#000000', 0));
-  const darkColor = useRef(new THREE.Color('#3b4754')); // iOS Weather slate grey
-  const lightColor = useRef(new THREE.Color('#4a8bdd')); // iOS Weather rich blue
-  const finalColor = useRef(new THREE.Color('#000000'));
+  
+  // These must perfectly match the BOTTOM colors of the App.jsx CSS gradients
+  const rainyBottom = useRef(new THREE.Color('#5c6874'));
+  const sunnyBottom = useRef(new THREE.Color('#63a1ea'));
   const blackColor = useRef(new THREE.Color('#000000'));
+  const targetFogColor = useRef(new THREE.Color());
 
   useEffect(() => {
     fogRef.current = new THREE.FogExp2('#000000', 0);
@@ -64,8 +66,8 @@ function CameraManager({ onScrollStateChange, score }) {
 
     const isHealthy = score / 100;
 
-    finalColor.current.lerpColors(darkColor.current, lightColor.current, isHealthy);
-    finalColor.current.lerp(blackColor.current, Math.max(0, 1 - (offset - 0.5) * 2));
+    targetFogColor.current.lerpColors(rainyBottom.current, sunnyBottom.current, isHealthy);
+    targetFogColor.current.lerp(blackColor.current, Math.max(0, 1 - (offset - 0.5) * 2));
 
     const targetZ = THREE.MathUtils.lerp(5, 1.05, offset);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.1);
@@ -81,13 +83,11 @@ function CameraManager({ onScrollStateChange, score }) {
     if (!state.scene.fog) {
       state.scene.fog = fogRef.current;
     }
-    state.scene.fog.color.copy(finalColor.current);
+    state.scene.fog.color.copy(targetFogColor.current);
     state.scene.fog.density = fogDensity;
     
-    if (!state.scene.background) {
-      state.scene.background = new THREE.Color();
-    }
-    state.scene.background.copy(finalColor.current);
+    // IMPORTANT: Make canvas background transparent so CSS gradient shows through!
+    state.scene.background = null; 
   });
 
   return null;
@@ -96,10 +96,8 @@ function CameraManager({ onScrollStateChange, score }) {
 export default function Scene({ score, onScrollStateChange }) {
   return (
     <ErrorBoundary>
-      <Canvas camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
-        {/* Pitch black ambient light for realistic space shadows */}
+      <Canvas gl={{ alpha: true }} camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 1000 }}>
         <ambientLight intensity={0.02} />
-        {/* Illumination from top-left, matching iOS Earth lockscreen */}
         <directionalLight position={[-5, 5, 5]} intensity={3.0} color="#ffffff" />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         

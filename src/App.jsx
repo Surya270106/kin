@@ -5,50 +5,58 @@ import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [score, setScore] = useState(50);
-  const [inAtmosphere, setInAtmosphere] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
 
-  const handleScrollState = (offset) => {
-    if (offset > 0.6 && !inAtmosphere) {
-      setInAtmosphere(true);
-    } else if (offset < 0.6 && inAtmosphere) {
-      setInAtmosphere(false);
-    }
-  };
+  const isHealthy = score / 100;
 
   return (
     <>
-      <div
-        className="title"
-        style={{
-          color: score > 60
-            ? `rgba(100, 255, 150, ${0.7 + (score - 60) / 100})`
-            : score < 40
-            ? `rgba(180, 210, 255, ${0.5 + (40 - score) / 100})`
-            : '#ffffff',
-          transition: 'color 2s ease'
-        }}
-      >
-        KIN
-      </div>
+      {/* Deep Space Background */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundColor: '#000000',
+        zIndex: -5
+      }} />
 
-      <Scene score={score} onScrollStateChange={handleScrollState} />
+      {/* Sunny Background (iOS Weather Style) */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, #1d62c5 0%, #63a1ea 100%)',
+        opacity: Math.min(scrollOffset * 3, 1) * isHealthy,
+        transition: 'opacity 1s ease',
+        zIndex: -4
+      }} />
+
+      {/* Rainy Background (iOS Weather Style) */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, #2a313a 0%, #5c6874 100%)',
+        opacity: Math.min(scrollOffset * 3, 1) * (1 - isHealthy),
+        transition: 'opacity 1s ease',
+        zIndex: -3
+      }} />
+
+      <Scene score={score} onScrollStateChange={setScrollOffset} />
       
       <AnimatePresence>
-        {inAtmosphere && (
+        {scrollOffset > 0.1 && (
           <Questionnaire score={score} setScore={setScore} />
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {!inAtmosphere && (
-          <div className="scroll-indicator">
-            <div style={{ fontSize: '11px', letterSpacing: '3px', marginBottom: '8px' }}>
-              SCROLL
-            </div>
-            <div style={{ fontSize: '20px', lineHeight: 1 }}>↓</div>
-          </div>
-        )}
-      </AnimatePresence>
+      <div style={{
+        position: 'absolute',
+        top: '30px',
+        left: '30px',
+        color: `hsl(${score * 1.2}, 100%, 70%)`,
+        letterSpacing: '8px',
+        fontSize: '18px',
+        fontWeight: 300,
+        transition: 'color 1s ease',
+        zIndex: 10
+      }}>
+        KIN
+      </div>
     </>
   );
 }
